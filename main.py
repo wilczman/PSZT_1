@@ -13,6 +13,10 @@ from random import randint
 
 
 def load():
+    '''
+    Wczytywanie danych
+    :return:  Słownik współrzędnych punktów i ilość punktów w osobniku
+    '''
     _points = {}
     with open("WE.txt") as file:
         for line in file.readlines():
@@ -22,6 +26,12 @@ def load():
 
 
 def evaluate(specimen, points_arg):
+    '''
+    Funkcja celu
+    :param specimen: osobnik w formie listy
+    :param points_arg: słownik współrzędnych danych punktów
+    :return: długość trasy
+    '''
     total = 0
     for nr in range(len(specimen)-1):
         total += sqrt(
@@ -36,6 +46,12 @@ def evaluate(specimen, points_arg):
 
 
 def mutation(specimen, specimen_length_arg):
+    '''
+    Implementacja mutacji, losowanie dwóch współrzędnych i zamiana punktu między nimi
+    :param specimen: osobnik w formie listy
+    :param specimen_length_arg: wielkość osobnika
+    :return: zmieniony osobnik w formie listy
+    '''
     while True:
         (a, b) = (randint(0, specimen_length_arg-1), randint(0, specimen_length_arg-1))
         if a != b:
@@ -45,6 +61,13 @@ def mutation(specimen, specimen_length_arg):
 
 
 def crossover(parent1, parent2, specimen_length_arg):
+    '''
+    implementacja krzyżowania dwupunktowego z uwzględnieniem braku możliwości powtórzeń
+    :param parent1: rodzic 1
+    :param parent2: rodzic 2
+    :param specimen_length_arg: wielkość osobnika
+    :return: zmieniony osobnik w formie listy
+    '''
     # newborn = parent 1 + a piece from parent 2
     newborn = ['NULL' for i in range(0, specimen_length_arg)]
     while True:
