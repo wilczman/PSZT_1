@@ -61,7 +61,7 @@ def crossover(parent1, parent2, specimen_length_arg):
         newborn[:b] = parent2[:b]
         for nr in list(range(a, specimen_length_arg))+list(range(0, b)):
             newborn[nr] = rest.pop(0)
-    return newborn, a, b
+    return newborn
 
 def init_population():
     pass
