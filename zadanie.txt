@@ -1,0 +1,18 @@
+MM.AE2 Problem komiwojażera - alg. ewolucyjne
+
+Rozwiązanie powinno opierać się na wybranym algorytmie ewolucyjnym z pewnym modelem 
+osobników oraz odpowiednio zaimplementowanymi operacjami krzyżowania i mutacji. 
+Sensownie przedstawić postęp w działaniu algorytmu (np. Wypisując kluczowe informacje diagnostyczne). 
+WE: plik z definicją mapy/grafu, WY: najkrótszy cykl łączący punkty.
+
+Zawartość dokumentacji (max 3 strony):
+1. Treść zadania
+2. Przyjęte założenia, doprecyzowanie treści
+3. (2pkt) Podział odpowiedzialności w zespole - kto się czym zajmował
+4. (5pkt) Zwięzły opis algorytmu/architektura i uzasadnienie sposobu realizacji
+5. (5pkt) Raport z przeprowadzonych eksperymentów, sposób testowania, tabelki, wykresy etc.
+Zbieramy wyniki i statystyki wykonania tj. liczymy m.in. czas obliczeń, liczbę kroków/generacji, ew. ale niekoniecznie złożoność pamięciową itp.
+6. (3pkt) Wnioski, przemyślenia, ew. możliwe usprawnienia
+7. Zwięzła instrukcja dla użytkownika programu
+Bez szczegółów implementacyjnych tj. opisu struktury klas, funkcji itd.
+Nie zmniejszać czcionki, nie upychać wykresów - przemyśleć zawartość
