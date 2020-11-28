@@ -28,6 +28,10 @@ def evaluate(specimen, points_arg):
             (points_arg[specimen[nr+1]][0]-points_arg[specimen[nr]][0])**2 +
             (points_arg[specimen[nr+1]][1]-points_arg[specimen[nr]][1])**2
         )
+    total += sqrt(
+                    (points_arg[specimen[0]][0] - points_arg[specimen[-1]][0]) ** 2 +
+                    (points_arg[specimen[0]][1] - points_arg[specimen[-1]][1]) ** 2
+    )
     return total
 
 
@@ -54,7 +58,6 @@ def crossover(parent1, parent2, specimen_length_arg):
         newborn[a:b] = parent2[a:b]
         for nr in list(range(0, a))+list(range(b, specimen_length_arg)):
             newborn[nr] = rest.pop(0)
-
     else:
         rest = [letter for letter in parent1 if letter not in parent2[:b] + parent2[a:]]
         newborn[a:] = parent2[a:]
@@ -63,16 +66,17 @@ def crossover(parent1, parent2, specimen_length_arg):
             newborn[nr] = rest.pop(0)
     return newborn
 
+
 def init_population():
     pass
 
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
-    # default_specimen = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    # print(points)
-    # print('Specimen length: ', specimen_length)
-    # print('Default route length: ', evaluate(default_specimen, points))
+    default_specimen = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    print(points)
+    print('Specimen length: ', specimen_length)
+    print('Default route length: ', evaluate(default_specimen, points))
     # print('Mutation: ', mutation(default_specimen, specimen_length))
     # print('Mutated specimen route length: ', evaluate(default_specimen, points))
     # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
