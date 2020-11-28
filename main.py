@@ -42,29 +42,25 @@ def mutation(specimen, specimen_length_arg):
 
 def crossover(parent1, parent2, specimen_length_arg):
     # newborn = parent 1 + a piece from parent 2
+    newborn = ['NULL' for i in range(0, specimen_length_arg)]
     while True:
-        (a, b) = (randint(0, specimen_length_arg - 1), randint(0, specimen_length_arg - 1))
+        # (a, b) = (randint(0, specimen_length_arg - 1), randint(0, specimen_length_arg - 1))
+        (a, b) = (2, 6)
         if specimen_length_arg > abs(a-b) > 1:
             print('crossover points: ', a, b)
             break
     if a < b:
-        newborn = ['NULL' for i in range(0, specimen_length_arg)]
+        rest = [letter for letter in parent1 if letter not in parent2[a:b]]
         newborn[a:b] = parent2[a:b]
         for nr in list(range(0, a))+list(range(b, specimen_length_arg)):
-            if parent1[nr] not in parent2[a:b]:
-                newborn[nr] = parent1[nr]
-            else:
-                newborn[nr] = parent2[nr]
+            newborn[nr] = rest.pop(0)
+
     else:
-        newborn = ['NULL' for i in range(0, specimen_length_arg)]
+        rest = [letter for letter in parent1 if letter not in parent2[:b] + parent2[a:]]
         newborn[a:] = parent2[a:]
         newborn[:b] = parent2[:b]
         for nr in list(range(a, specimen_length_arg))+list(range(0, b)):
-            print(nr)
-            if parent1[nr] not in parent2[0:b]+parent2[a:]:
-                newborn[nr] = parent1[nr]
-            else:
-                newborn[nr] = parent2[nr]
+            newborn[nr] = rest.pop(0)
     return newborn, a, b
 
 def init_population():
