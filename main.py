@@ -145,7 +145,6 @@ def crossover(parent1, parent2):
         (a, b) = (randint(0, specimen_length - 1), randint(0, specimen_length - 1))
         # (a, b) = (2, 6)
         if specimen_length > abs(a-b) > 1:
-            print('crossover points: ', a, b)
             break
     if a < b:
         rest = [letter for letter in parent1 if letter not in parent2[a:b]]
@@ -329,6 +328,7 @@ def experiment(
     :param elite_size: Ilość najlepszych osobników ze starej populacji przechodzącej do następnej. Domyślna wartość: 30% populacji
     :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
     :param tournament_size: Wielkość turnieju (liczba porównywanych ze sobą osobników) podczas selekcji turniejowej. Domyślna wartość: 2
+    :return: osobnik który wygrał i jego wartość
     '''
     if not elite_size:
         elite_size = int(population_size * 0.3)
@@ -352,34 +352,51 @@ def experiment(
 
     best_path = experiment_information["current_best"]
     best_value = experiment_information["current_best_value"]
-    print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
-        f"o długości: {best_value}")
+    print(f"Najkrótszy cykl zwrócony przez algorytm: "
+          f"{specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base))} " +
+          f"o długości: {best_value}")
+
+    return specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)),best_value
+
+
+def specimen_normalization(specimen):
+    '''
+    Przesunięcie w osobniku, żeby zaczynał się od A
+    :param specimen:
+    :return:
+    '''
+    _specimen = specimen
+    for iteration in range(0, _specimen.index('A')):
+        _specimen = _specimen[1:] + [_specimen[0]]
+    return _specimen
 
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
     p_s, crd = transform_points_definition(points)
-    print(p_s)
+    # print(p_s)
     distances_mtrx = calculate_distances(crd)
-    print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
-    default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
+    # print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
+    # default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
     # print(points)
     # print('Specimen length: ', specimen_length)
-    print('Default route length: ', evaluate(default_specimen, distances_mtrx))
-    print('Mutation: ', mutation(default_specimen))
+    # print('Default route length: ', evaluate(default_specimen, distances_mtrx))
+    # print('Mutation: ', mutation(default_specimen))
     # # print('Mutated specimen route length: ', evaluate(default_specimen, points))
     # # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
-    spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
+    # spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    # spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
     # print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
     # print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
-    print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']))
+    # print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']))
 
-    old_population = init_population(specimen_length, 20)
-    new_population = init_population(specimen_length, 10)
-
+    # old_population = init_population(specimen_length, 20)
+    # new_population = init_population(specimen_length, 10)
+    # experiment(points, 10)
     # print(elite_select(old_population, new_population, 3, distances_mtrx))
-    print(tournament_selection(old_population, 3, distances_mtrx))
-
-    experiment(points, 10)
+    # print(tournament_selection(old_population, 3, distances_mtrx))
+    najlepsze = []
+    for i in range(0,10):
+        najlepsze.append( experiment(points, 10) )
+    for c in najlepsze:
+        print(c)
