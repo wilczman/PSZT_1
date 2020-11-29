@@ -142,9 +142,9 @@ def crossover(parent1, parent2):
     specimen_length = len(parent1)
     newborn = ['NULL' for i in range(0, specimen_length)]
     while True:
-        (a, b) = (randint(0, specimen_length_arg - 1), randint(0, specimen_length_arg - 1))
+        (a, b) = (randint(0, specimen_length - 1), randint(0, specimen_length - 1))
         # (a, b) = (2, 6)
-        if specimen_length_arg > abs(a-b) > 1:
+        if specimen_length > abs(a-b) > 1:
             print('crossover points: ', a, b)
             break
     if a < b:
@@ -280,6 +280,7 @@ def calculate_best_in_population(population, distances):
 
 def should_terminate_execution(population, experiment_information, iterations_count_threshold, distances):
     if not experiment_information["current_best"]:
+        experiment_information["current_best"], experiment_information["current_best_value"] = calculate_best_in_population(population, distances)
         return False
     else:
         best_in_population, best_value_in_population = calculate_best_in_population(population, distances)
