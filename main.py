@@ -10,7 +10,7 @@
 
 from math import sqrt
 from random import randint, shuffle, sample, random
-from numpy import array, zeros, full, argpartition, Inf, insert, mean, std, concatenate
+from numpy import array, zeros, full, argpartition, Inf, insert, mean, std, concatenate, linspace
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -488,6 +488,116 @@ def investigate_population_size(start, end, step_arg, points):
     print(mean_values, std_values)
 
 
+def investigate_elitarism(start, end, step_arg, points):
+    elite_sizes = list(range(start, end, step_arg))
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(elite_sizes), ])
+    std_values = zeros(shape=[len(elite_sizes), ])
+
+    generations_mean = zeros(shape=[len(elite_sizes), ])
+    generations_values = zeros(shape=[len(elite_sizes), ])
+
+    for idx, _elite_size in enumerate(elite_sizes):
+        paths_values = zeros(shape=[experiments_per_size,])
+        generations = zeros(shape=[experiments_per_size,])
+
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                    population_size=600,
+                                    elite_size=_elite_size)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
+        
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=elite_sizes,
+            y=mean_values,
+            line=dict(color='rgb(50, 168, 82)'),
+            mode='lines',
+            showlegend=False
+        ),
+        go.Scatter(
+            x=elite_sizes+elite_sizes[::-1],
+            y=get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(50, 168, 82, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.update_layout(
+        xaxis_title='Najkrótszy cykl',
+        yaxis_title='Rozmiar elity',
+        title='Zależność długości najkrótszego cyklu zwracanego przez algorytm, \nw funkcji rozmiaru elity'
+    )
+    fig.write_image(f"elite_size_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
+
+
+def investigate_mutation(start, end, step_arg, points):
+    mutation_probabilites = list(linspace(start, end, num=int((end-start)/step_arg + 1)))
+    print(mutation_probabilites)
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(mutation_probabilites), ])
+    std_values = zeros(shape=[len(mutation_probabilites), ])
+
+    generations_mean = zeros(shape=[len(mutation_probabilites), ])
+    generations_values = zeros(shape=[len(mutation_probabilites), ])
+
+    for idx, _mutation_probability in enumerate(mutation_probabilites):
+        paths_values = zeros(shape=[experiments_per_size,])
+        generations = zeros(shape=[experiments_per_size,])
+
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                    population_size=600,
+                                    elite_size=90,
+                                    mutation_probability=_mutation_probability)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
+        
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=mutation_probabilites,
+            y=mean_values,
+            line=dict(color='rgb(64, 0, 224)'),
+            mode='lines',
+            showlegend=False
+        ),
+        go.Scatter(
+            x=mutation_probabilites+mutation_probabilites[::-1],
+            y=get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(64, 0, 224, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.update_layout(
+        xaxis_title='Prawdopodobieństwo mutacji',
+        yaxis_title='Najkrótszy cykl',
+        title='Zależność długości najkrótszego cyklu zwracanego przez algorytm, \nw funkcji prawdopodobieństwa mutacji'
+    )
+    fig.write_image(f"probability_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
+
+
 if __name__ == "__main__":
     (points, specimen_length) = load()
 
@@ -508,5 +618,7 @@ if __name__ == "__main__":
     # najlepsze.sort()
     # for c in najlepsze:
     #     print(c)
-    investigate_population_size(10, 1000, 10, points)
 
+    # investigate_population_size(10, 1000, 10, points)
+    # investigate_elitarism(30, 480, 30, points)
+    investigate_mutation(0.1, 1.0, 0.1, points)
