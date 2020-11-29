@@ -10,7 +10,7 @@
 
 from math import sqrt
 from random import randint, shuffle
-from numpy import array, zeros
+from numpy import array, zeros, full, argpartition, Inf
 
 def load():
     '''
@@ -174,8 +174,46 @@ def init_population(specimen_length, population_size):
 
     return population
 
-def select():
-    pass
+def find_n_smallest(values, n):
+    '''
+    Funkcja zwracająca indeksy n najmniejszych wartości z wektora values
+    :param values: wektor wejściowy numpy.array
+    :param n: ilość najmniejszych wartości z values, których indeksy chcemy dostać
+    :return: wektor indeksów najmniejszych n wartości
+    '''
+    return argpartition(values, n)[:n]
+
+def find_n_greatest(values, n):
+    '''
+    Funkcja zwracająca indeksy n największych wartości z wektora values
+    :param values: wektor wejściowy numpy.array
+    :param n: ilość największych wartości z values, których indeksy chcemy dostać
+    :return: wektor indeksów największych n wartości
+    '''
+    return argpartition(values, -n)[-n:]
+
+def elite_select(old_population, newborns, num_best_left, distances):
+    '''
+    Funkcja dokonująca selekcji elitarnej
+    :param old_population: populacja stworzona w poprzedniej iteracji
+    :param newborns: nowe osobniki stworzone w obecnej iteracji poprzez krzyżowanie i mutację
+    :param num_best_left: liczba najlepszych osobników z old_population, które zostanie zachowana
+    :param distances: macierz zawierająca odległości między punktami
+    :return: nową populację po selekcji elitarnej
+    '''
+    old_population_evaluation = full(shape=[len(old_population),], fill_value=Inf)
+    newborns_evaluation = full(shape=[len(newborns),], fill_value=Inf)
+
+    for idx, specimen in enumerate(old_population):
+        old_population_evaluation[idx] = evaluate(specimen, distances)
+
+    for idx, specimen in enumerate(newborns):
+        newborns_evaluation[idx] = evaluate(specimen, distances)
+
+    best_old_population_indices = find_n_smallest(old_population_evaluation, num_best_left)
+    best_newborns_indices = find_n_smallest(newborns_evaluation, len(old_population)-num_best_left)
+
+    return [old_population[idx] for idx in best_old_population_indices] + [newborns[idx] for idx in best_newborns_indices]
 
 
 if __name__ == "__main__":
@@ -200,5 +238,8 @@ if __name__ == "__main__":
     print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
                     ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'], specimen_length))
 
-    print(init_population(specimen_length, 10))
+    old_population = init_population(specimen_length, 10)
+    new_population = init_population(specimen_length, 10)
+
+    print(elite_select(old_population, new_population, 3, distances_mtrx))
 
