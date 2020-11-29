@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="efcac8ea-8bdb-47f5-8606-d55f3f766b1a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/WE_copy.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WE_generator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/WE.txt" beforeDir="false" afterPath="$PROJECT_DIR$/WE.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -43,7 +41,7 @@
       <recent name="C:\Users\Kuba\Desktop\GIT\PSZT_1" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.WE_generator">
+  <component name="RunManager" selected="Python.main">
     <configuration name="WE_generator" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PSZT_1" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -51,9 +49,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\Kuba\Desktop\GIT\PSZT_1\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -73,9 +71,9 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\Kuba\Desktop\GIT\PSZT_1\venv\Scripts\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
@@ -90,8 +88,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.WE_generator" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.WE_generator" />
       </list>
     </recent_temporary>
   </component>
@@ -108,6 +106,7 @@
       <workItem from="1605375470772" duration="963000" />
       <workItem from="1606578973389" duration="16629000" />
       <workItem from="1606648187156" duration="31000" />
+      <workItem from="1606679322326" duration="4794000" />
     </task>
     <servers />
   </component>
@@ -115,29 +114,37 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1923" height="290" key="GridCell.Tab.0.bottom" timestamp="1606664343627">
+    <state x="715" y="148" key="#WE_generator" timestamp="1606679362217">
       <screen x="0" y="0" width="1966" height="1066" />
     </state>
-    <state width="1923" height="290" key="GridCell.Tab.0.bottom/0.0.1966.1066@0.0.1966.1066" timestamp="1606664343627" />
-    <state width="1923" height="290" key="GridCell.Tab.0.center" timestamp="1606664343627">
+    <state x="715" y="148" key="#WE_generator/0.0.1966.1066@0.0.1966.1066" timestamp="1606679362217" />
+    <state x="715" y="148" key="#main" timestamp="1606679371239">
       <screen x="0" y="0" width="1966" height="1066" />
     </state>
-    <state width="1923" height="290" key="GridCell.Tab.0.center/0.0.1966.1066@0.0.1966.1066" timestamp="1606664343627" />
-    <state width="1923" height="290" key="GridCell.Tab.0.left" timestamp="1606664343627">
+    <state x="715" y="148" key="#main/0.0.1966.1066@0.0.1966.1066" timestamp="1606679371239" />
+    <state width="1923" height="282" key="GridCell.Tab.0.bottom" timestamp="1606684359091">
       <screen x="0" y="0" width="1966" height="1066" />
     </state>
-    <state width="1923" height="290" key="GridCell.Tab.0.left/0.0.1966.1066@0.0.1966.1066" timestamp="1606664343627" />
-    <state width="1923" height="290" key="GridCell.Tab.0.right" timestamp="1606664343627">
+    <state width="1923" height="282" key="GridCell.Tab.0.bottom/0.0.1966.1066@0.0.1966.1066" timestamp="1606684359091" />
+    <state width="1923" height="282" key="GridCell.Tab.0.center" timestamp="1606684359091">
       <screen x="0" y="0" width="1966" height="1066" />
     </state>
-    <state width="1923" height="290" key="GridCell.Tab.0.right/0.0.1966.1066@0.0.1966.1066" timestamp="1606664343627" />
+    <state width="1923" height="282" key="GridCell.Tab.0.center/0.0.1966.1066@0.0.1966.1066" timestamp="1606684359091" />
+    <state width="1923" height="282" key="GridCell.Tab.0.left" timestamp="1606684359091">
+      <screen x="0" y="0" width="1966" height="1066" />
+    </state>
+    <state width="1923" height="282" key="GridCell.Tab.0.left/0.0.1966.1066@0.0.1966.1066" timestamp="1606684359091" />
+    <state width="1923" height="282" key="GridCell.Tab.0.right" timestamp="1606684359091">
+      <screen x="0" y="0" width="1966" height="1066" />
+    </state>
+    <state width="1923" height="282" key="GridCell.Tab.0.right/0.0.1966.1066@0.0.1966.1066" timestamp="1606684359091" />
     <state x="492" y="176" key="SettingsEditor" timestamp="1606652594121">
       <screen x="0" y="0" width="1966" height="1066" />
     </state>
     <state x="492" y="176" key="SettingsEditor/0.0.1966.1066@0.0.1966.1066" timestamp="1606652594121" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PSZT_1$main.coverage" NAME="main Coverage Results" MODIFIED="1606661607741" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/PSZT_1$WE_generator.coverage" NAME="WE_generator Coverage Results" MODIFIED="1606664343613" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PSZT_1$WE_generator.coverage" NAME="WE_generator Coverage Results" MODIFIED="1606684343524" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PSZT_1$main.coverage" NAME="main Coverage Results" MODIFIED="1606684359075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

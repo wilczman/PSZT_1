@@ -356,7 +356,7 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size,
+    population_size=500,
     elite_size=None,
     mutation_probability=0.1,
     tournament_size=2,
@@ -447,7 +447,7 @@ def investigate_population_size(start, end, step_arg, points):
     for idx, _population_size in enumerate(population_sizes):
         paths_values = zeros(shape=[experiments_per_size,])
         generations = zeros(shape=[experiments_per_size,])
-
+        print(_population_size)
         for expr in range(experiments_per_size):
             expr_result = experiment(points,
                                     population_size=_population_size)
@@ -482,23 +482,75 @@ def investigate_population_size(start, end, step_arg, points):
     fig.update_layout(
         xaxis_title='Najkrótszy cykl',
         yaxis_title='Liczba osobników w pokoleniu',
-        title='Zależność długości najkrótszego cyklu zwracanego przez algorytm, \nw funkcji liczebności populacji'
+        title='Zależność długości najlepszego cyklu od liczebności populacji'
     )
     fig.write_image(f"ppl_size_{start}_{end}_{step_arg}.jpg")
     print(mean_values, std_values)
 
+def investigate_tournament_size(start, end, step_arg, points):
+    tournament_sizes = list(range(start, end, step_arg))
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(tournament_sizes), ])
+    std_values = zeros(shape=[len(tournament_sizes), ])
+
+    generations_mean = zeros(shape=[len(tournament_sizes), ])
+    generations_values = zeros(shape=[len(tournament_sizes), ])
+
+    for idx, _tournament_size in enumerate(tournament_sizes):
+        paths_values = zeros(shape=[experiments_per_size, ])
+        generations = zeros(shape=[experiments_per_size, ])
+        print(_tournament_size)
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                     tournament_size=_tournament_size)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
+
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=tournament_sizes,
+            y=mean_values,
+            line=dict(color='rgb(227, 51, 39)'),
+            mode='lines',
+            showlegend=False
+        ),
+        go.Scatter(
+            x=tournament_sizes + tournament_sizes[::-1],
+            y=get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(227, 51, 39, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.update_layout(
+        xaxis_title='Najkrótszy cykl',
+        yaxis_title='Liczba osobników uczestniczących w turnieju',
+        title='Zależność długości najlepszego cyklu od wielkości turnieju'
+    )
+    fig.write_image(f"trnmt_size_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
 
-    # najlepsze = []
-    # plot = go.Figure()
+    plot = go.Figure()
+    najlepsze = []
     # for i in range(0, 5):
     #     najlepsze.append(experiment(points,
-    #                                 population_size=30,
-    #                                 elite_size=None,
+    #                                 population_size=400,
+    #                                 elite_size=100,
     #                                 tournament_size=2,
-    #                                 iteration_count_end=30,
+    #                                 iteration_count_end=100,
+    #                                 mutation_probability=0.1,
     #                                 plot_best_values_repeated=plot)
     #                      )
     # plot.update_layout(title="Zmiana najkrótszego cyklu w populacji na przestrzeni generacji",
@@ -508,5 +560,6 @@ if __name__ == "__main__":
     # najlepsze.sort()
     # for c in najlepsze:
     #     print(c)
-    investigate_population_size(10, 1000, 10, points)
+    # investigate_population_size(300, 1100, 100, points)
+    investigate_tournament_size(2, 10, 1, points)
 
