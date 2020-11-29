@@ -466,7 +466,8 @@ def investigate_population_size(start, end, step_arg, points):
             x=population_sizes,
             y=mean_values,
             line=dict(color='rgb(227, 51, 39)'),
-            mode='lines'
+            mode='lines',
+            showlegend=False
         ),
         go.Scatter(
             x=population_sizes+population_sizes[::-1],
@@ -478,6 +479,11 @@ def investigate_population_size(start, end, step_arg, points):
             showlegend=False
         )
     ])
+    fig.update_layout(
+        xaxis_title='Najkrótszy cykl',
+        yaxis_title='Liczba osobników w pokoleniu',
+        title='Zależność długości najkrótszego cyklu zwracanego przez algorytm, \nw funkcji liczebności populacji'
+    )
     fig.write_image(f"ppl_size_{start}_{end}_{step_arg}.jpg")
     print(mean_values, std_values)
 
@@ -502,5 +508,5 @@ if __name__ == "__main__":
     # najlepsze.sort()
     # for c in najlepsze:
     #     print(c)
-    investigate_population_size(10, 110, 10, points)
+    investigate_population_size(10, 1000, 10, points)
 
