@@ -10,7 +10,7 @@
 
 from math import sqrt
 from random import randint, shuffle, sample, random
-from numpy import array, zeros, full, argpartition, Inf, insert, mean, std
+from numpy import array, zeros, full, argpartition, Inf, insert, mean, std, concatenate
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -432,7 +432,7 @@ def specimen_normalization(specimen):
 def get_std_bounds(std_values, mean_values):
     y_upper = mean_values + std_values
     y_lower = mean_values - std_values
-    return y_upper + y_lower[::-1]
+    return concatenate([y_upper, y_lower[::-1]])
 
 
 def investigate_population_size(start, end, step_arg, points):
@@ -502,5 +502,5 @@ if __name__ == "__main__":
     # najlepsze.sort()
     # for c in najlepsze:
     #     print(c)
-    investigate_population_size(10, 30, 10, points)
+    investigate_population_size(10, 110, 10, points)
 
