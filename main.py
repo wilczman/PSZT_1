@@ -9,7 +9,7 @@
 # example specimen == [A,G,F,D,E,H,B,C]
 
 from math import sqrt
-from random import randint, shuffle, sample
+from random import randint, shuffle, sample, random
 from numpy import array, zeros, full, argpartition, Inf, insert
 
 def load():
@@ -317,7 +317,7 @@ def should_terminate_execution(population, experiment_information, iterations_co
             return False
 
 
-def genetic_operations(specimens, population_size):
+def genetic_operations(specimens, population_size, mutation_probability):
     '''
     Funkcja wykonująca operacje genetyczne na określonych osobnikach
     :param specimens: osobniki, na których będzie dokonywane krzyżowanie i mutacja
@@ -328,9 +328,10 @@ def genetic_operations(specimens, population_size):
 
     for idx in range(population_size):
         [parent_A, parent_B] = sample(specimens, k=2)
-        crossed_specimen = crossover(parent_A, parent_B)
-        mutated_specimen = mutation(crossed_specimen)
-        newborns[idx] = mutated_specimen
+        _specimen = crossover(parent_A, parent_B)
+        if random() < mutation_probability:
+            _specimen = mutation(_specimen)
+        newborns[idx] = _specimen
 
     return newborns
     
@@ -339,6 +340,7 @@ def experiment(
     points,
     population_size,
     elite_size=None,
+    mutation_probability=0.1,
     tournament_size=2,
     iteration_count_end=50
 ):
@@ -347,6 +349,7 @@ def experiment(
     :param points: słownik punktów i ich koordynatów
     :param population_size: ilość osobników w populacji
     :param elite_size: Ilość najlepszych osobników ze starej populacji przechodzącej do następnej. Domyślna wartość: 30% populacji
+    :param mutation_probability: prawdopodobieństwo wystąpienia mutacji, domyślnie 1/10
     :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
     :param tournament_size: Wielkość turnieju (liczba porównywanych ze sobą osobników) podczas selekcji turniejowej. Domyślna wartość: 2
     :return: osobnik który wygrał i jego wartość
@@ -370,7 +373,7 @@ def experiment(
 
     while not should_terminate_execution(population, experiment_information, iteration_count_end, distances_mtrx):
         population_after_selection = tournament_selection(population, tournament_size, distances_mtrx)
-        newborns = genetic_operations(population_after_selection, population_size)
+        newborns = genetic_operations(population_after_selection, population_size, mutation_probability)
         population = elite_succesion(population, newborns, elite_size, distances_mtrx)
 
     best_path = experiment_information["current_best"]
@@ -426,6 +429,7 @@ if __name__ == "__main__":
         najlepsze.append(experiment(points,
                                     population_size=100,
                                     elite_size=None,
+                                    mutation_probability=0.1,
                                     tournament_size=2,
                                     iteration_count_end=30)
                          )
