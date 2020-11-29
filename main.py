@@ -127,9 +127,9 @@ def mutation(specimen):
     specimen_length = len(specimen)
     while True:
         (a, b) = (randint(0, specimen_length-1), randint(0, specimen_length-1))
-        if a != b:
+        if a < b:
             break
-    (specimen[a], specimen[b]) = (specimen[b], specimen[a])
+    specimen[a:b] = specimen[a:b][::-1]
     return specimen
 
 
@@ -356,7 +356,7 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size=500,
+    population_size=600,
     elite_size=None,
     mutation_probability=0.1,
     tournament_size=2,
@@ -672,6 +672,6 @@ if __name__ == "__main__":
     #     print(c)
     
     # investigate_population_size(300, 1100, 100, points)
-    # investigate_tournament_size(2, 10, 1, points)
+    investigate_tournament_size(2, 10, 1, points)
     # investigate_elitarism(30, 480, 30, points)
-    investigate_mutation(0.1, 1.0, 0.1, points)
+    # investigate_mutation(0.1, 1.0, 0.1, points)
