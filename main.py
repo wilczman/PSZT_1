@@ -9,8 +9,8 @@
 # example specimen == [A,G,F,D,E,H,B,C]
 
 from math import sqrt
-from random import randint
-
+from random import randint, shuffle
+from numpy import array, zeros
 
 def load():
     '''
@@ -24,24 +24,92 @@ def load():
             _points[temp[0]] = (int(temp[1]), int(temp[2]))
     return _points, len(_points.keys())
 
+def transform_points_definition(points_arg):
+    '''
+    Funkcja "transformująca" słownikową definicję punktów na
+    listy, aby umożliwić późniejsze wykorzystanie indeksów w listach
+    zamiast poszukiwania elementów w słownikach
+    (kolejność w listach jest deterministyczna, w słownikach niekoniecznie)
+    :param points_arg: słownik punktów
+    :return: lista nazw punktów z pliku wejściowego, lista punktów w postaci liczbowej oraz lista koorydnatów
+    '''
+    _points_symbolic = list()
+    _points_indices = list()
+    _coordinates = list()
 
-def evaluate(specimen, points_arg):
+    idx = 0
+    for point, coordinates in points_arg.items():
+        _points_symbolic.append(point)
+        _points_indices.append(idx)
+        idx = idx + 1
+        _coordinates.append(coordinates)
+
+    return _points_symbolic, _points_indices, _coordinates
+
+def get_symbolic_representation(indices, symbolic_base):
+    '''
+    Funkcja zwracająca symboliczną reprezentację osobnika
+    :param indices: indeksowa reprezentacja osobnika
+    :param symbolic_base: bazowa lista punktów w formie symboli
+    :return: osobnik w formie symbolicznej
+    '''
+    symbolic = list()
+
+    for idx in indices:
+        symbolic.append(symbolic_base[idx])
+
+    return symbolic
+
+def get_indices_representation(symbolic, symbolic_base):
+    '''
+    Funkcja zwracająca indeksową reprezentację osobnika
+    :param indices: symboliczna reprezentacja osobnika
+    :param symbolic_base: bazowa lista punktów w formie symboli
+    :return: osobnik w formie indeksowej
+    '''
+    indices = list()
+
+    for point in symbolic:
+        indices.append(symbolic_base.index(point))
+
+    return indices
+
+def calculate_distances(points_arg, coordinates_arg):
+    '''
+    Funkcja wyznaczająca bezpośrednie odległości pomiędzy punktami
+    :param points_arg: lista wszystkich punktów w postaci indeksów
+    :param coordinates_arg: lista koordynatów punktów
+    :return: macierz zawierająca odległości pomiędzy punktami
+    '''
+    size = len(points_arg)
+    distances = zeros(shape=[size, size])
+
+    for idy in points_arg:
+        for idx in range(idy, size):
+            if idx == idy:
+                continue
+
+            distances[idx, idy] = sqrt(
+                (coordinates_arg[idx][0]-coordinates_arg[idy][0])**2 +
+                (coordinates_arg[idx][1]-coordinates_arg[idy][1])**2
+            )
+
+            distances[idy, idx] = distances[idx, idy]
+
+    return distances
+
+def evaluate(specimen, distances):
     '''
     Funkcja celu
-    :param specimen: osobnik w formie listy
-    :param points_arg: słownik współrzędnych danych punktów
+    :param specimen: osobnik w formie listy indeksów
+    :param distances: macierz odległości punktów
     :return: długość trasy
     '''
     total = 0
-    for nr in range(len(specimen)-1):
-        total += sqrt(
-            (points_arg[specimen[nr+1]][0]-points_arg[specimen[nr]][0])**2 +
-            (points_arg[specimen[nr+1]][1]-points_arg[specimen[nr]][1])**2
-        )
-    total += sqrt(
-                    (points_arg[specimen[0]][0] - points_arg[specimen[-1]][0]) ** 2 +
-                    (points_arg[specimen[0]][1] - points_arg[specimen[-1]][1]) ** 2
-    )
+    for idx in range(len(specimen)-1):
+        total += distances[specimen[idx]][specimen[idx+1]]
+
+    total += distances[specimen[0]][specimen[-1]]
     return total
 
 
@@ -90,22 +158,47 @@ def crossover(parent1, parent2, specimen_length_arg):
     return newborn
 
 
-def init_population():
+def init_population(specimen_length, population_size):
+    '''
+    Funkcja generująca losową, początkową populację
+    :param specimen_length: wielkość osobnika
+    :param population_size: wielkość populacji
+    :return: początkowa populacja
+    '''
+    population = list()
+    base_specimen = list(range(0, specimen_length))
+    for _ in range(population_size):
+        specimen = base_specimen[:]
+        shuffle(specimen)
+        population.append(specimen)
+
+    return population
+
+def select():
     pass
 
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
-    default_specimen = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    print(points)
-    print('Specimen length: ', specimen_length)
-    print('Default route length: ', evaluate(default_specimen, points))
-    # print('Mutation: ', mutation(default_specimen, specimen_length))
-    # print('Mutated specimen route length: ', evaluate(default_specimen, points))
-    # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
-    print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
-    print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
+    p_s, p_i, crd = transform_points_definition(points)
+    print(p_s, p_i)
+    distances_mtrx = calculate_distances(p_i, crd)
+    print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
+    default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
+    # print(points)
+    # print('Specimen length: ', specimen_length)
+    print('Default route length: ', evaluate(default_specimen, distances_mtrx))
+    print('Mutation: ', mutation(default_specimen, specimen_length))
+    # # print('Mutated specimen route length: ', evaluate(default_specimen, points))
+    # # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
+    spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    print(get_indices_representation(spec_1, p_s))
+    spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
+    print(get_indices_representation(spec_2, p_s))
+    # print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
+    # print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
     print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'], specimen_length)
-         )
+                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'], specimen_length))
+
+    print(init_population(specimen_length, 10))
 
