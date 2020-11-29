@@ -429,9 +429,9 @@ if __name__ == "__main__":
         najlepsze.append(experiment(points,
                                     population_size=100,
                                     elite_size=None,
-                                    mutation_probability=0.1,
+                                    mutation_probability=1,
                                     tournament_size=2,
-                                    iteration_count_end=30)
+                                    iteration_count_end=15)
                          )
     najlepsze.sort()
     for c in najlepsze:
