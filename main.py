@@ -10,7 +10,7 @@
 
 from math import sqrt
 from random import randint, shuffle, sample
-from numpy import array, zeros, full, argpartition, Inf
+from numpy import array, zeros, full, argpartition, Inf, insert
 
 def load():
     '''
@@ -145,7 +145,7 @@ def crossover(parent1, parent2):
         (a, b) = (randint(0, specimen_length - 1), randint(0, specimen_length - 1))
         # (a, b) = (2, 6)
         if specimen_length > abs(a-b) > 1:
-            print('crossover points: ', a, b)
+            # print('crossover points: ', a, b)
             break
     if a < b:
         rest = [letter for letter in parent1 if letter not in parent2[a:b]]
@@ -216,7 +216,7 @@ def tournament_selection(population, tournament_size, distances):
     for idx in range(tournament_iterations):
         competing_specimens = sample(list(enumerate(_population)), k=tournament_size)
         indices_to_delete = [None] * tournament_size
-        print(f"Competing specimens: {competing_specimens}")
+        # print(f"Competing specimens: {competing_specimens}")
 
         best_value = Inf
         best_index = None
@@ -227,12 +227,12 @@ def tournament_selection(population, tournament_size, distances):
             iter = iter + 1
 
             path_evaluation = evaluate(specimen[1], distances)
-            print(f"Specimen: {_population[specimen[0]]} evaluation: {path_evaluation}")
+            # print(f"Specimen: {_population[specimen[0]]} evaluation: {path_evaluation}")
             if path_evaluation < best_value:
                 best_value = path_evaluation
                 best_index = specimen[0]
 
-        print(f"Tournament won by: {_population[best_index]}")
+        # print(f"Tournament won by: {_population[best_index]}")
 
         new_population[idx] = _population[best_index]
 
@@ -281,9 +281,24 @@ def calculate_best_in_population(population, distances):
 def should_terminate_execution(population, experiment_information, iterations_count_threshold, distances):
     if not experiment_information["current_best"]:
         experiment_information["current_best"], experiment_information["current_best_value"] = calculate_best_in_population(population, distances)
+        experiment_information["best_values_array_repeated"] = insert(
+                                                        experiment_information["best_values_array_repeated"],
+                                                        experiment_information["best_values_array_repeated"].size,
+                                                        experiment_information["current_best_value"]
+                                                    )
+        experiment_information["best_values_array"] = insert(
+                                                        experiment_information["best_values_array"],
+                                                        experiment_information["best_values_array"].size,
+                                                        experiment_information["current_best_value"]
+                                                    )
         return False
     else:
         best_in_population, best_value_in_population = calculate_best_in_population(population, distances)
+        experiment_information["best_values_array_repeated"] = insert(
+                                                            experiment_information["best_values_array_repeated"],
+                                                            experiment_information["best_values_array_repeated"].size,
+                                                            best_value_in_population
+                                                        )
         if best_in_population == experiment_information["current_best"]:
             experiment_information["iterations_without_change"] = experiment_information["iterations_without_change"] + 1
             if experiment_information["iterations_without_change"] > iterations_count_threshold:
@@ -294,6 +309,11 @@ def should_terminate_execution(population, experiment_information, iterations_co
             experiment_information["iterations_without_change"] = 0
             experiment_information["current_best"] = best_in_population
             experiment_information["current_best_value"] = best_value_in_population
+            experiment_information["best_values_array"] = insert(
+                                                        experiment_information["best_values_array"],
+                                                        experiment_information["best_values_array"].size,
+                                                        best_value_in_population
+                                                    )
             return False
 
 
@@ -320,7 +340,7 @@ def experiment(
     population_size,
     elite_size=None,
     tournament_size=2,
-    iteration_count_end=15
+    iteration_count_end=50
 ):
     '''
     Funkcja wykonująca cały eksperyment algorytmu ewolucyjnego dla zadanych parametrów
@@ -340,7 +360,9 @@ def experiment(
     experiment_information = {
         "current_best": None,
         "current_best_value": Inf,
-        "iterations_without_change": 0
+        "iterations_without_change": 0,
+        "best_values_array": array([]),
+        "best_values_array_repeated": array([])
     }
 
     population = init_population(specimen_length, population_size)
@@ -352,34 +374,12 @@ def experiment(
 
     best_path = experiment_information["current_best"]
     best_value = experiment_information["current_best_value"]
+    generations_num = experiment_information["best_values_array"].size
+    generations_num_repeated = experiment_information["best_values_array_repeated"].size
     print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
-        f"o długości: {best_value}")
+        f"o długości: {best_value}, znaleziony w {generations_num} generacji ({generations_num_repeated} z powtórzeniami)")
 
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
-    p_s, crd = transform_points_definition(points)
-    print(p_s)
-    distances_mtrx = calculate_distances(crd)
-    print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
-    default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
-    # print(points)
-    # print('Specimen length: ', specimen_length)
-    print('Default route length: ', evaluate(default_specimen, distances_mtrx))
-    print('Mutation: ', mutation(default_specimen))
-    # # print('Mutated specimen route length: ', evaluate(default_specimen, points))
-    # # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
-    spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
-    # print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
-    # print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
-    print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']))
-
-    old_population = init_population(specimen_length, 20)
-    new_population = init_population(specimen_length, 10)
-
-    # print(elite_select(old_population, new_population, 3, distances_mtrx))
-    print(tournament_selection(old_population, 3, distances_mtrx))
-
-    experiment(points, 10)
+    experiment(points, 100)
