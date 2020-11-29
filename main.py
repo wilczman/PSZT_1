@@ -10,7 +10,7 @@
 
 from math import sqrt
 from random import randint, shuffle, sample
-from numpy import array, zeros, full, argpartition, Inf, insert
+from numpy import array, zeros, full, argpartition, Inf, insert, mean, std
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -425,29 +425,78 @@ def specimen_normalization(specimen):
     return _specimen
 
 
-def investigate_population_size(start, end, step_arg):
-    population_sizes = list(range(start, end, step=step_arg))
-    for population_size in population_sizes:
+def get_std_bounds(std_values, mean_values):
+    y_upper = mean_values + std_values
+    y_lower = mean_values - std_values
+    return y_upper + y_lower[::-1]
+
+
+def investigate_population_size(start, end, step_arg, points):
+    population_sizes = list(range(start, end, step_arg))
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(population_sizes), ])
+    std_values = zeros(shape=[len(population_sizes), ])
+
+    generations_mean = zeros(shape=[len(population_sizes), ])
+    generations_values = zeros(shape=[len(population_sizes), ])
+
+    for idx, _population_size in enumerate(population_sizes):
+        paths_values = zeros(shape=[experiments_per_size,])
+        generations = zeros(shape=[experiments_per_size,])
+
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                    population_size=_population_size)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
         
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=population_sizes,
+            y=mean_values,
+            line=dict(color='rgb(227, 51, 39)'),
+            mode='lines'
+        ),
+        go.Scatter(
+            x=population_sizes+population_sizes[::-1],
+            y=get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(227, 51, 39, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.write_image(f"ppl_size_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
+
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
 
-    najlepsze = []
-    plot = go.Figure()
-    for i in range(0, 5):
-        najlepsze.append(experiment(points,
-                                    population_size=30,
-                                    elite_size=None,
-                                    tournament_size=2,
-                                    iteration_count_end=30,
-                                    plot_best_values_repeated=plot)
-                         )
-    plot.update_layout(title="Zmiana najkrótszego cyklu w populacji na przestrzeni generacji",
-                        xaxis_title="Numer generacji", 
-                        yaxis_title="Długość najkrótszego cyklu w populacji",)
-    plot.write_image("test.png")
-    najlepsze.sort()
-    for c in najlepsze:
-        print(c)
+    # najlepsze = []
+    # plot = go.Figure()
+    # for i in range(0, 5):
+    #     najlepsze.append(experiment(points,
+    #                                 population_size=30,
+    #                                 elite_size=None,
+    #                                 tournament_size=2,
+    #                                 iteration_count_end=30,
+    #                                 plot_best_values_repeated=plot)
+    #                      )
+    # plot.update_layout(title="Zmiana najkrótszego cyklu w populacji na przestrzeni generacji",
+    #                     xaxis_title="Numer generacji", 
+    #                     yaxis_title="Długość najkrótszego cyklu w populacji",)
+    # plot.write_image("test.png")
+    # najlepsze.sort()
+    # for c in najlepsze:
+    #     print(c)
+    investigate_population_size(10, 30, 10, points)
 
