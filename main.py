@@ -10,7 +10,9 @@
 
 from math import sqrt
 from random import randint, shuffle, sample, random
-from numpy import array, zeros, full, argpartition, Inf, insert
+from numpy import array, zeros, full, argpartition, Inf, insert, mean, std
+import plotly.express as px
+import plotly.graph_objects as go
 
 def load():
     '''
@@ -266,6 +268,12 @@ def elite_succesion(old_population, newborns, num_best_left, distances):
 
 
 def calculate_best_in_population(population, distances):
+    '''
+    Funkcja zwracająca najlepiej przystosowanego osobnika (najkrótszy cykl) w populacji
+    :param population: lista zawierająca całą populację
+    :param distances: macierz odległości między punktami
+    :return: najkrótszy cykl i jego długość
+    '''
     best_specimen = None
     best_value = Inf
 
@@ -279,6 +287,16 @@ def calculate_best_in_population(population, distances):
 
 
 def should_terminate_execution(population, experiment_information, iterations_count_threshold, distances):
+    '''
+    Funkcja warunkująca koniec wykonywania algorytmu. Sprawdza czy najlepiej przystosowany osobnik
+    nowej populacji pokrywa się z dotychczasowym najlepszym osobnikiem.
+    Jeśli taka sytuacja powtarza się przez X generacji, algorytm kończy działanie.
+    :param population: lista zawierająca całą populację
+    :param experiment_information: słownik przechowujący informacje o wykonywującym się algorytmie
+    :param iterations_count_threshold: próg X ilości generacji bez poprawy populacji
+    :param distances: macierz odległości między punktami
+    :return: Boolowska wartość określająca czy działanie algorytmu ma zostać zatrzymane
+    '''
     if not experiment_information["current_best"]:
         experiment_information["current_best"], experiment_information["current_best_value"] = calculate_best_in_population(population, distances)
         experiment_information["best_values_array_repeated"] = insert(
@@ -342,7 +360,9 @@ def experiment(
     elite_size=None,
     mutation_probability=0.1,
     tournament_size=2,
-    iteration_count_end=50
+    iteration_count_end=50,
+    plot_best_values=None,
+    plot_best_values_repeated=None,
 ):
     '''
     Funkcja wykonująca cały eksperyment algorytmu ewolucyjnego dla zadanych parametrów
@@ -352,7 +372,10 @@ def experiment(
     :param mutation_probability: prawdopodobieństwo wystąpienia mutacji, domyślnie 1/10
     :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
     :param tournament_size: Wielkość turnieju (liczba porównywanych ze sobą osobników) podczas selekcji turniejowej. Domyślna wartość: 2
-    :return: osobnik który wygrał i jego wartość
+    :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
+    :return: wartość najkrótszego cyklu, osobnik który wygrał, 
+        ilość generacji (bez uwzględniania generacji, w których najlepszy osobnik pozostawał bez mian) 
+        oraz ilość generacji (z uwzględnieniem wszystkich generacji)
     '''
     if not elite_size:
         elite_size = int(population_size * 0.3)
@@ -383,6 +406,12 @@ def experiment(
     print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
         f"o długości: {best_value}, znaleziony w {generations_num} generacji ({generations_num_repeated} z powtórzeniami)")
 
+    if plot_best_values_repeated:
+        plot_best_values_repeated.add_trace(go.Scatter(
+                                                    x=list(range(generations_num_repeated)),
+                                                    y=experiment_information["best_values_array_repeated"],
+                                                    mode='lines', name=""))
+
     return best_value, specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)), generations_num, generations_num_repeated
 
 
@@ -395,45 +424,83 @@ def specimen_normalization(specimen):
     _specimen = specimen
     for iteration in range(0, _specimen.index('A')): # A na początek
         _specimen = _specimen[1:] + [_specimen[0]]
-    if _specimen[-1] > _specimen[1]: # upewnienie się że cykl będzie zawsze w tą samą stronę szedł (kierunek zgodny z alfabetem)
+    if _specimen[-1] > _specimen[1]: # upewnienie się że cykl będzie zawsze w tą[osamą stronę szedł (kierunek zgodny z alfabetem)
         _specimen = [_specimen[0]] + _specimen[1:][::-1]
     return _specimen
 
 
+def get_std_bounds(std_values, mean_values):
+    y_upper = mean_values + std_values
+    y_lower = mean_values - std_values
+    return y_upper + y_lower[::-1]
+
+
+def investigate_population_size(start, end, step_arg, points):
+    population_sizes = list(range(start, end, step_arg))
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(population_sizes), ])
+    std_values = zeros(shape=[len(population_sizes), ])
+
+    generations_mean = zeros(shape=[len(population_sizes), ])
+    generations_values = zeros(shape=[len(population_sizes), ])
+
+    for idx, _population_size in enumerate(population_sizes):
+        paths_values = zeros(shape=[experiments_per_size,])
+        generations = zeros(shape=[experiments_per_size,])
+
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                    population_size=_population_size)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
+        
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=population_sizes,
+            y=mean_values,
+            line=dict(color='rgb(227, 51, 39)'),
+            mode='lines'
+        ),
+        go.Scatter(
+            x=population_sizes+population_sizes[::-1],
+            y=get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(227, 51, 39, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.write_image(f"ppl_size_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
+
+
 if __name__ == "__main__":
     (points, specimen_length) = load()
-    p_s, crd = transform_points_definition(points)
-    # print(p_s)
-    distances_mtrx = calculate_distances(crd)
-    # print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
-    # default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
-    # print(points)
-    # print('Specimen length: ', specimen_length)
-    # print('Default route length: ', evaluate(default_specimen, distances_mtrx))
-    # print('Mutation: ', mutation(default_specimen))
-    # # print('Mutated specimen route length: ', evaluate(default_specimen, points))
-    # # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
-    # spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    # spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
-    # print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
-    # print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
-    # print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']))
 
-    # old_population = init_population(specimen_length, 20)
-    # new_population = init_population(specimen_length, 10)
-    # experiment(points, 10)
-    # print(elite_select(old_population, new_population, 3, distances_mtrx))
-    # print(tournament_selection(old_population, 3, distances_mtrx))
-    najlepsze = []
-    for i in range(0, 10):
-        najlepsze.append(experiment(points,
-                                    population_size=100,
-                                    elite_size=None,
-                                    mutation_probability=1,
-                                    tournament_size=2,
-                                    iteration_count_end=15)
-                         )
-    najlepsze.sort()
-    for c in najlepsze:
-        print(c)
+    # najlepsze = []
+    # plot = go.Figure()
+    # for i in range(0, 5):
+    #     najlepsze.append(experiment(points,
+    #                                 population_size=30,
+    #                                 elite_size=None,
+    #                                 tournament_size=2,
+    #                                 iteration_count_end=30,
+    #                                 plot_best_values_repeated=plot)
+    #                      )
+    # plot.update_layout(title="Zmiana najkrótszego cyklu w populacji na przestrzeni generacji",
+    #                     xaxis_title="Numer generacji", 
+    #                     yaxis_title="Długość najkrótszego cyklu w populacji",)
+    # plot.write_image("test.png")
+    # najlepsze.sort()
+    # for c in najlepsze:
+    #     print(c)
+    investigate_population_size(10, 30, 10, points)
 
