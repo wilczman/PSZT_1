@@ -380,7 +380,7 @@ def experiment(
     print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
         f"o długości: {best_value}, znaleziony w {generations_num} generacji ({generations_num_repeated} z powtórzeniami)")
 
-    return specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)), best_value, generations_num, generations_num_repeated
+    return best_value, specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)), generations_num, generations_num_repeated
 
 
 def specimen_normalization(specimen):
