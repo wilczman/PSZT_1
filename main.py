@@ -357,7 +357,7 @@ def experiment(
           f"{specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base))} " +
           f"o długości: {best_value}")
 
-    return specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)),best_value
+    return best_value, specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base))
 
 
 def specimen_normalization(specimen):
