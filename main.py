@@ -9,7 +9,7 @@
 # example specimen == [A,G,F,D,E,H,B,C]
 
 from math import sqrt
-from random import randint, shuffle
+from random import randint, shuffle, sample
 from numpy import array, zeros, full, argpartition, Inf
 
 def load():
@@ -147,13 +147,13 @@ def crossover(parent1, parent2, specimen_length_arg):
     if a < b:
         rest = [letter for letter in parent1 if letter not in parent2[a:b]]
         newborn[a:b] = parent2[a:b]
-        for nr in list(range(0, a))+list(range(b, specimen_length_arg)):
+        for nr in list(range(0, a)) + list(range(b, specimen_length_arg)):
             newborn[nr] = rest.pop(0)
     else:
         rest = [letter for letter in parent1 if letter not in parent2[:b] + parent2[a:]]
         newborn[a:] = parent2[a:]
         newborn[:b] = parent2[:b]
-        for nr in list(range(a, specimen_length_arg))+list(range(0, b)):
+        for nr in list(range(a, specimen_length_arg)) + list(range(0, b)):
             newborn[nr] = rest.pop(0)
     return newborn
 
@@ -192,7 +192,47 @@ def find_n_greatest(values, n):
     '''
     return argpartition(values, -n)[-n:]
 
-def elite_select(old_population, newborns, num_best_left, distances):
+def tournament_selection(population, tournament_size, distances):
+    '''
+    Funkcja dokonująca selekcji turniejowej
+    Z populacji wyciągane są osobniki (w liczbie równej wielkości turnieju) i porównywane są ich funkcje celu (długości cyklu)
+    zachowany zostaje ten z mniejszą długością.
+    Powtarzane do momentu wyczerpania populacji
+    :param population: obecna populacja
+    :param tournament_size: wielkość turnieju
+    :param distances: macierz odległości pomiędzy punktami
+    :return: populacja po selekcji turniejowej
+    '''
+    new_population = list()
+    _population = population[:] # tworzenie kopii populacji, ponieważ w poniższej pętli usuwany są z niej elementy
+    tournament_iterations = int(len(population) / tournament_size)
+
+    for _ in range(tournament_iterations):
+        competing_specimens = sample(list(enumerate(_population)), k=tournament_size)
+        indices_to_delete = list()
+        print(f"Competing specimens: {competing_specimens}")
+
+        best_value = Inf
+        best_index = None
+        for specimen in competing_specimens:
+            indices_to_delete.append(specimen[0])
+            path_evaluation = evaluate(specimen[1], distances)
+            print(f"Specimen: {_population[specimen[0]]} evaluation: {path_evaluation}")
+            if path_evaluation < best_value:
+                best_value = path_evaluation
+                best_index = specimen[0]
+
+        print(f"Tournament won by: {_population[best_index]}")
+
+        new_population.append(_population[best_index])
+
+        for idx in sorted(indices_to_delete, reverse=True):
+            del _population[idx]
+
+    return new_population
+
+
+def elite_succesion(old_population, newborns, num_best_left, distances):
     '''
     Funkcja dokonująca selekcji elitarnej
     :param old_population: populacja stworzona w poprzedniej iteracji
@@ -238,8 +278,9 @@ if __name__ == "__main__":
     print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
                     ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'], specimen_length))
 
-    old_population = init_population(specimen_length, 10)
+    old_population = init_population(specimen_length, 20)
     new_population = init_population(specimen_length, 10)
 
-    print(elite_select(old_population, new_population, 3, distances_mtrx))
+    # print(elite_select(old_population, new_population, 3, distances_mtrx))
+    print(tournament_selection(old_population, 3, distances_mtrx))
 
