@@ -24,6 +24,7 @@ def load():
             _points[temp[0]] = (int(temp[1]), int(temp[2]))
     return _points, len(_points.keys())
 
+
 def transform_points_definition(points_arg):
     '''
     Funkcja "transformująca" słownikową definicję punktów na
@@ -31,20 +32,20 @@ def transform_points_definition(points_arg):
     zamiast poszukiwania elementów w słownikach
     (kolejność w listach jest deterministyczna, w słownikach niekoniecznie)
     :param points_arg: słownik punktów
-    :return: lista nazw punktów z pliku wejściowego, lista punktów w postaci liczbowej oraz lista koorydnatów
+    :return: bazowa lista nazw punktów (służąca później do "translacji") z pliku wejściowego oraz lista koorydnatów
     '''
-    _points_symbolic = list()
-    _points_indices = list()
-    _coordinates = list()
+    points_num = len(points_arg)
+    _points_symbolic = [None] * points_num
+    _coordinates = [None] * points_num
 
     idx = 0
     for point, coordinates in points_arg.items():
-        _points_symbolic.append(point)
-        _points_indices.append(idx)
+        _points_symbolic[idx] = point
+        _coordinates[idx] = coordinates
         idx = idx + 1
-        _coordinates.append(coordinates)
 
-    return _points_symbolic, _points_indices, _coordinates
+    return _points_symbolic, _coordinates
+
 
 def get_symbolic_representation(indices, symbolic_base):
     '''
@@ -60,6 +61,7 @@ def get_symbolic_representation(indices, symbolic_base):
 
     return symbolic
 
+
 def get_indices_representation(symbolic, symbolic_base):
     '''
     Funkcja zwracająca indeksową reprezentację osobnika
@@ -74,17 +76,17 @@ def get_indices_representation(symbolic, symbolic_base):
 
     return indices
 
-def calculate_distances(points_arg, coordinates_arg):
+
+def calculate_distances(coordinates_arg):
     '''
     Funkcja wyznaczająca bezpośrednie odległości pomiędzy punktami
-    :param points_arg: lista wszystkich punktów w postaci indeksów
     :param coordinates_arg: lista koordynatów punktów
     :return: macierz zawierająca odległości pomiędzy punktami
     '''
-    size = len(points_arg)
+    size = len(coordinates_arg)
     distances = zeros(shape=[size, size])
 
-    for idy in points_arg:
+    for idy in range(size):
         for idx in range(idy, size):
             if idx == idy:
                 continue
@@ -97,6 +99,7 @@ def calculate_distances(points_arg, coordinates_arg):
             distances[idy, idx] = distances[idx, idy]
 
     return distances
+
 
 def evaluate(specimen, distances):
     '''
@@ -113,47 +116,47 @@ def evaluate(specimen, distances):
     return total
 
 
-def mutation(specimen, specimen_length_arg):
+def mutation(specimen):
     '''
     Implementacja mutacji, losowanie dwóch współrzędnych i zamiana punktu między nimi
     :param specimen: osobnik w formie listy
-    :param specimen_length_arg: wielkość osobnika
     :return: zmieniony osobnik w formie listy
     '''
+    specimen_length = len(specimen)
     while True:
-        (a, b) = (randint(0, specimen_length_arg-1), randint(0, specimen_length_arg-1))
+        (a, b) = (randint(0, specimen_length-1), randint(0, specimen_length-1))
         if a != b:
             break
     (specimen[a], specimen[b]) = (specimen[b], specimen[a])
     return specimen
 
 
-def crossover(parent1, parent2, specimen_length_arg):
+def crossover(parent1, parent2):
     '''
     implementacja krzyżowania dwupunktowego z uwzględnieniem braku możliwości powtórzeń
     :param parent1: rodzic 1
     :param parent2: rodzic 2
-    :param specimen_length_arg: wielkość osobnika
     :return: zmieniony osobnik w formie listy
     '''
     # newborn = parent 1 + a piece from parent 2
-    newborn = ['NULL' for i in range(0, specimen_length_arg)]
+    specimen_length = len(parent1)
+    newborn = ['NULL' for i in range(0, specimen_length)]
     while True:
-        # (a, b) = (randint(0, specimen_length_arg - 1), randint(0, specimen_length_arg - 1))
+        # (a, b) = (randint(0, specimen_length - 1), randint(0, specimen_length - 1))
         (a, b) = (2, 6)
-        if specimen_length_arg > abs(a-b) > 1:
+        if specimen_length > abs(a-b) > 1:
             print('crossover points: ', a, b)
             break
     if a < b:
         rest = [letter for letter in parent1 if letter not in parent2[a:b]]
         newborn[a:b] = parent2[a:b]
-        for nr in list(range(0, a)) + list(range(b, specimen_length_arg)):
+        for nr in list(range(0, a)) + list(range(b, specimen_length)):
             newborn[nr] = rest.pop(0)
     else:
         rest = [letter for letter in parent1 if letter not in parent2[:b] + parent2[a:]]
         newborn[a:] = parent2[a:]
         newborn[:b] = parent2[:b]
-        for nr in list(range(a, specimen_length_arg)) + list(range(0, b)):
+        for nr in list(range(a, specimen_length)) + list(range(0, b)):
             newborn[nr] = rest.pop(0)
     return newborn
 
@@ -165,14 +168,15 @@ def init_population(specimen_length, population_size):
     :param population_size: wielkość populacji
     :return: początkowa populacja
     '''
-    population = list()
+    population = [None] * population_size
     base_specimen = list(range(0, specimen_length))
-    for _ in range(population_size):
+    for idx in range(population_size):
         specimen = base_specimen[:]
         shuffle(specimen)
-        population.append(specimen)
+        population[idx] = specimen
 
     return population
+
 
 def find_n_smallest(values, n):
     '''
@@ -183,6 +187,7 @@ def find_n_smallest(values, n):
     '''
     return argpartition(values, n)[:n]
 
+
 def find_n_greatest(values, n):
     '''
     Funkcja zwracająca indeksy n największych wartości z wektora values
@@ -191,6 +196,7 @@ def find_n_greatest(values, n):
     :return: wektor indeksów największych n wartości
     '''
     return argpartition(values, -n)[-n:]
+
 
 def tournament_selection(population, tournament_size, distances):
     '''
@@ -203,19 +209,23 @@ def tournament_selection(population, tournament_size, distances):
     :param distances: macierz odległości pomiędzy punktami
     :return: populacja po selekcji turniejowej
     '''
-    new_population = list()
     _population = population[:] # tworzenie kopii populacji, ponieważ w poniższej pętli usuwany są z niej elementy
     tournament_iterations = int(len(population) / tournament_size)
+    new_population = [None] * tournament_iterations
 
-    for _ in range(tournament_iterations):
+    for idx in range(tournament_iterations):
         competing_specimens = sample(list(enumerate(_population)), k=tournament_size)
-        indices_to_delete = list()
+        indices_to_delete = [None] * tournament_size
         print(f"Competing specimens: {competing_specimens}")
 
         best_value = Inf
         best_index = None
+
+        iter = 0
         for specimen in competing_specimens:
-            indices_to_delete.append(specimen[0])
+            indices_to_delete[iter] = specimen[0]
+            iter = iter + 1
+
             path_evaluation = evaluate(specimen[1], distances)
             print(f"Specimen: {_population[specimen[0]]} evaluation: {path_evaluation}")
             if path_evaluation < best_value:
@@ -224,7 +234,7 @@ def tournament_selection(population, tournament_size, distances):
 
         print(f"Tournament won by: {_population[best_index]}")
 
-        new_population.append(_population[best_index])
+        new_population[idx] = _population[best_index]
 
         for idx in sorted(indices_to_delete, reverse=True):
             del _population[idx]
@@ -234,12 +244,12 @@ def tournament_selection(population, tournament_size, distances):
 
 def elite_succesion(old_population, newborns, num_best_left, distances):
     '''
-    Funkcja dokonująca selekcji elitarnej
+    Funkcja dokonująca sukcesji elitarnej
     :param old_population: populacja stworzona w poprzedniej iteracji
     :param newborns: nowe osobniki stworzone w obecnej iteracji poprzez krzyżowanie i mutację
     :param num_best_left: liczba najlepszych osobników z old_population, które zostanie zachowana
     :param distances: macierz zawierająca odległości między punktami
-    :return: nową populację po selekcji elitarnej
+    :return: nowa populacja po sukcesji elitarnej
     '''
     old_population_evaluation = full(shape=[len(old_population),], fill_value=Inf)
     newborns_evaluation = full(shape=[len(newborns),], fill_value=Inf)
@@ -256,27 +266,114 @@ def elite_succesion(old_population, newborns, num_best_left, distances):
     return [old_population[idx] for idx in best_old_population_indices] + [newborns[idx] for idx in best_newborns_indices]
 
 
+def calculate_best_in_population(population, distances):
+    best_specimen = None
+    best_value = Inf
+
+    for specimen in population:
+        specimen_value = evaluate(specimen, distances)
+        if specimen_value < best_value:
+            best_specimen = specimen
+            best_value = specimen_value
+
+    return (best_specimen, best_value)
+
+def should_terminate_execution(population, experiment_information, iterations_count_threshold, distances):
+    if not experiment_information["current_best"]:
+        return False
+    else:
+        best_in_population, best_value_in_population = calculate_best_in_population(population, distances)
+        if best_in_population == experiment_information["current_best"]:
+            experiment_information["iterations_without_change"] = experiment_information["iterations_without_change"] + 1
+            if experiment_information["iterations_without_change"] > iterations_count_threshold:
+                return True
+            else:
+                return False
+        else:
+            experiment_information["iterations_without_change"] = 0
+            experiment_information["current_best"] = best_in_population
+            experiment_information["current_best_value"] = best_value_in_population
+            return False
+
+
+def genetic_operations(specimens, population_size):
+    '''
+    Funkcja wykonująca operacje genetyczne na określonych osobnikach
+    :param specimens: osobniki, na których będzie dokonywane krzyżowanie i mutacja
+    :param population_size: wielkość populacji określona przez warunki początkowe
+    :return: nowo stworzone osobniki
+    '''
+    newborns = [None] * population_size
+
+    for idx in range(population_size):
+        [parent_A, parent_B] = sample(specimens, k=2)
+        crossed_specimen = crossover(parent_A, parent_B)
+        mutated_specimen = mutation(crossed_specimen)
+        newborns[idx] = mutated_specimen
+
+    return newborns
+    
+
+def experiment(
+    points,
+    population_size,
+    elite_size=None,
+    tournament_size=2,
+    iteration_count_end=15
+):
+    '''
+    Funkcja wykonująca cały eksperyment algorytmu ewolucyjnego dla zadanych parametrów
+    :param points: słownik punktów i ich koordynatów
+    :param population_size: ilość osobników w populacji
+    :param elite_size: Ilość najlepszych osobników ze starej populacji przechodzącej do następnej. Domyślna wartość: 30% populacji
+    :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
+    :param tournament_size: Wielkość turnieju (liczba porównywanych ze sobą osobników) podczas selekcji turniejowej. Domyślna wartość: 2
+    '''
+    if not elite_size:
+        elite_size = int(population_size * 0.3)
+    
+    specimen_length = len(points)
+    symbolic_points_base, coordinates_list = transform_points_definition(points)
+    distances_mtrx = calculate_distances(coordinates_list)
+
+    experiment_information = {
+        "current_best": None,
+        "current_best_value": Inf,
+        "iterations_without_change": 0
+    }
+
+    population = init_population(specimen_length, population_size)
+
+    while not should_terminate_execution(population, experiment_information, iteration_count_end, distances_mtrx):
+        population_after_selection = tournament_selection(population, tournament_size, distances_mtrx)
+        newborns = genetic_operations(population_after_selection, population_size)
+        population = elite_succesion(population, newborns, elite_size, distances_mtrx)
+
+    best_path = experiment_information["current_best"]
+    best_value = experiment_information["current_best_value"]
+    print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
+        f"o długości: {best_value}")
+
+
 if __name__ == "__main__":
     (points, specimen_length) = load()
-    p_s, p_i, crd = transform_points_definition(points)
-    print(p_s, p_i)
-    distances_mtrx = calculate_distances(p_i, crd)
+    p_s, crd = transform_points_definition(points)
+    print(p_s)
+    distances_mtrx = calculate_distances(crd)
     print(evaluate([0, 1, 2, 3, 4, 5, 6, 7], distances_mtrx))
     default_specimen = [0, 1, 2, 3, 4, 5, 6, 7]
     # print(points)
     # print('Specimen length: ', specimen_length)
     print('Default route length: ', evaluate(default_specimen, distances_mtrx))
-    print('Mutation: ', mutation(default_specimen, specimen_length))
+    print('Mutation: ', mutation(default_specimen))
     # # print('Mutated specimen route length: ', evaluate(default_specimen, points))
     # # print(evaluate(['H', 'D', 'H', 'D', 'H', 'D', 'H', 'D'], points))
     spec_1 = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    print(get_indices_representation(spec_1, p_s))
     spec_2 = ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']
-    print(get_indices_representation(spec_2, p_s))
     # print(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'])
     # print(['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'])
     print(crossover(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
-                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G'], specimen_length))
+                    ['D', 'H', 'F', 'A', 'B', 'C', 'E', 'G']))
 
     old_population = init_population(specimen_length, 20)
     new_population = init_population(specimen_length, 10)
@@ -284,3 +381,4 @@ if __name__ == "__main__":
     # print(elite_select(old_population, new_population, 3, distances_mtrx))
     print(tournament_selection(old_population, 3, distances_mtrx))
 
+    experiment(points, 10)
