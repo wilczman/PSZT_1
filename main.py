@@ -380,7 +380,7 @@ def experiment(
     print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
         f"o długości: {best_value}, znaleziony w {generations_num} generacji ({generations_num_repeated} z powtórzeniami)")
 
-    return specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)),best_value
+    return specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base)), best_value, generations_num, generations_num_repeated
 
 
 def specimen_normalization(specimen):
@@ -424,10 +424,10 @@ if __name__ == "__main__":
     najlepsze = []
     for i in range(0, 10):
         najlepsze.append(experiment(points,
-                                    population_size=10,
+                                    population_size=100,
                                     elite_size=None,
                                     tournament_size=2,
-                                    iteration_count_end=15)
+                                    iteration_count_end=30)
                          )
     najlepsze.sort()
     for c in najlepsze:
