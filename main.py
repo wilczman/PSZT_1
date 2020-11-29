@@ -275,7 +275,8 @@ def calculate_best_in_population(population, distances):
             best_specimen = specimen
             best_value = specimen_value
 
-    return (best_specimen, best_value)
+    return best_specimen, best_value
+
 
 def should_terminate_execution(population, experiment_information, iterations_count_threshold, distances):
     if not experiment_information["current_best"]:
@@ -366,8 +367,10 @@ def specimen_normalization(specimen):
     :return:
     '''
     _specimen = specimen
-    for iteration in range(0, _specimen.index('A')):
+    for iteration in range(0, _specimen.index('A')): # A na początek
         _specimen = _specimen[1:] + [_specimen[0]]
+    if _specimen[-1] > _specimen[1]: # upewnienie się że cykl będzie zawsze w tą samą stronę szedł (kierunek zgodny z alfabetem)
+        _specimen = [_specimen[0]] + _specimen[1:][::-1]
     return _specimen
 
 
@@ -396,7 +399,14 @@ if __name__ == "__main__":
     # print(elite_select(old_population, new_population, 3, distances_mtrx))
     # print(tournament_selection(old_population, 3, distances_mtrx))
     najlepsze = []
-    for i in range(0,10):
-        najlepsze.append( experiment(points, 10) )
+    for i in range(0, 10):
+        najlepsze.append(experiment(points,
+                                    population_size=10,
+                                    elite_size=None,
+                                    tournament_size=2,
+                                    iteration_count_end=15)
+                         )
+    najlepsze.sort()
     for c in najlepsze:
         print(c)
+
