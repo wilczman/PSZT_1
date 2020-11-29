@@ -142,9 +142,9 @@ def crossover(parent1, parent2):
     specimen_length = len(parent1)
     newborn = ['NULL' for i in range(0, specimen_length)]
     while True:
-        # (a, b) = (randint(0, specimen_length - 1), randint(0, specimen_length - 1))
-        (a, b) = (2, 6)
-        if specimen_length > abs(a-b) > 1:
+        (a, b) = (randint(0, specimen_length_arg - 1), randint(0, specimen_length_arg - 1))
+        # (a, b) = (2, 6)
+        if specimen_length_arg > abs(a-b) > 1:
             print('crossover points: ', a, b)
             break
     if a < b:
@@ -156,7 +156,7 @@ def crossover(parent1, parent2):
         rest = [letter for letter in parent1 if letter not in parent2[:b] + parent2[a:]]
         newborn[a:] = parent2[a:]
         newborn[:b] = parent2[:b]
-        for nr in list(range(a, specimen_length)) + list(range(0, b)):
+        for nr in range(b, a):
             newborn[nr] = rest.pop(0)
     return newborn
 
