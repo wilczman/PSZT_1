@@ -8,6 +8,7 @@
 
 # example specimen == [A,G,F,D,E,H,B,C]
 
+import datetime
 from math import sqrt
 from random import randint, shuffle, sample, random
 from numpy import array, zeros, full, argpartition, Inf, insert, mean, std, concatenate, linspace
@@ -356,11 +357,11 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size=100,
-    elite_size_percent=10,
-    mutation_probability=0.35,
-    tournament_size=2,
-    iteration_count_end=20,
+    population_size=300,
+    elite_size_percent=15,
+    mutation_probability=0.9,
+    tournament_size=3,
+    iteration_count_end=100,
     plot_best_values=None,
     plot_best_values_repeated=None,
 ):
@@ -723,6 +724,27 @@ def investigate_iteration_count_end(start, end, step_arg, points):
     fig.write_image(f"iteration_count_end_{start}_{end}_{step_arg}.jpg")
     print(mean_values, std_values)
 
+def run_experiment_with_time_markers():
+    experiments_num = 10
+    values = zeros(shape=[experiments_num, ])
+    generations = zeros(shape=[experiments_num, ])
+    time = [None] * experiments_num
+
+    for idx in range(experiments_num):
+        time_start = datetime.datetime.now()
+        expr_result = experiment(points,
+                                population_size=300,
+                                elite_size_percent=15)
+        time_stop = datetime.datetime.now()
+        values[idx] = expr_result[0]
+        generations[idx] = expr_result[3]
+        time[idx] = (time_stop - time_start).total_seconds()
+
+    print(f"Długości cykli: {values}\nŚrednia długość cyklu: {mean(values)}")
+    print(f"Liczba generacji: {generations}\nŚrednia liczba generacji: {mean(generations)}")
+    print(f"Czasy wykonania: {time}\nŚrednie czasy wykonań: {mean(time)}")
+
+
 if __name__ == "__main__":
     (points, specimen_length) = load()
 
@@ -746,8 +768,8 @@ if __name__ == "__main__":
     #     print(c)
     
     # investigate_population_size(10, 2011, 50, points)
-    # investigate_tournament_size(2, 12, 1, points)
-    investigate_elitarism(1, 100, 9, points)
+    # investigate_tournament_size(2, 10, 1, points)
+    # investigate_elitarism(1, 100, 9, points)
     # investigate_mutation(0.01, 1.01, 0.05, points)
     # investigate_iteration_count_end(10,410,50, points)
     # experiment(points,
@@ -757,3 +779,4 @@ if __name__ == "__main__":
     #             iteration_count_end=400,
     #             mutation_probability=0.75,
     #             plot_best_values_repeated=plot)
+    run_experiment_with_time_markers()
