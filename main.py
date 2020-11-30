@@ -358,7 +358,7 @@ def experiment(
     points,
     population_size=400,
     elite_size_percent=10,
-    mutation_probability=0.7,
+    mutation_probability=0.8,
     tournament_size=3,
     iteration_count_end=100,
     plot_best_values=None,
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     # for c in najlepsze:
     #     print(c)
     
-    investigate_population_size(10, 910, 100, points)
+    investigate_population_size(10, 2011, 50, points)
     # investigate_tournament_size(2, 10, 1, points)
     # investigate_elitarism(1, 100, 10, points)
     # investigate_mutation(0.1, 1.0, 0.1, points)
