@@ -318,13 +318,14 @@ def should_terminate_execution(population, experiment_information, iterations_co
                                                             experiment_information["best_values_array_repeated"].size,
                                                             best_value_in_population
                                                         )
-        if best_in_population == experiment_information["current_best"]:
+        if best_value_in_population == experiment_information["current_best_value"]:
             experiment_information["iterations_without_change"] = experiment_information["iterations_without_change"] + 1
             if experiment_information["iterations_without_change"] > iterations_count_threshold:
                 return True
             else:
                 return False
         else:
+            # print(f"Best has changed, new best: {best_value_in_population}")
             experiment_information["iterations_without_change"] = 0
             experiment_information["current_best"] = best_in_population
             experiment_information["current_best_value"] = best_value_in_population
@@ -404,7 +405,7 @@ def experiment(
     best_value = experiment_information["current_best_value"]
     generations_num = experiment_information["best_values_array"].size
     generations_num_repeated = experiment_information["best_values_array_repeated"].size
-    print(f"Najkrótszy cykl zwrócony przez algorytm: {get_symbolic_representation(best_path, symbolic_points_base)} " + 
+    print(f"Najkrótszy cykl zwrócony przez algorytm: {specimen_normalization(get_symbolic_representation(best_path, symbolic_points_base))} " + 
         f"o długości: {best_value}, znaleziony w {generations_num} generacji ({generations_num_repeated} z powtórzeniami)")
 
     if plot_best_values_repeated:
@@ -733,8 +734,9 @@ def run_experiment_with_time_markers():
     for idx in range(experiments_num):
         time_start = datetime.datetime.now()
         expr_result = experiment(points,
-                                population_size=300,
-                                elite_size_percent=15)
+                                population_size=700,
+                                elite_size_percent=15, 
+                                iteration_count_end=200)
         time_stop = datetime.datetime.now()
         values[idx] = expr_result[0]
         generations[idx] = expr_result[3]
