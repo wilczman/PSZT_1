@@ -357,7 +357,7 @@ def genetic_operations(specimens, population_size, mutation_probability):
 def experiment(
     points,
     population_size=400,
-    elite_size_percent=0.3,
+    elite_size_percent=10,
     mutation_probability=0.7,
     tournament_size=3,
     iteration_count_end=100,
@@ -378,7 +378,7 @@ def experiment(
         oraz ilość generacji (z uwzględnieniem wszystkich generacji)
     '''
 
-    elite_size = int(population_size * elite_size_percent)
+    elite_size = int(population_size * elite_size_percent/100)
     
     specimen_length = len(points)
     symbolic_points_base, coordinates_list = transform_points_definition(points)
@@ -460,7 +460,7 @@ def investigate_population_size(start, end, step_arg, points):
         std_values[idx] = std(paths_values)
         min_values[idx] = min(paths_values)
         max_values[idx] = max(paths_values)
-        
+
         generations_mean[idx] = mean(generations)
         generations_values[idx] = std(generations)
 
@@ -565,7 +565,7 @@ def investigate_elitarism(start, end, step_arg, points):
         for expr in range(experiments_per_size):
             expr_result = experiment(points,
                                     # population_size=600,
-                                    elite_size=_elite_size)
+                                    elite_size_percent=_elite_size)
             paths_values[expr] = expr_result[0]
             generations[expr] = expr_result[3]
         
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     # for c in najlepsze:
     #     print(c)
     
-    investigate_population_size(10, 111, 50, points)
+    investigate_population_size(10, 910, 100, points)
     # investigate_tournament_size(2, 10, 1, points)
-    # investigate_elitarism(30, 480, 30, points)
+    # investigate_elitarism(1, 100, 10, points)
     # investigate_mutation(0.1, 1.0, 0.1, points)
