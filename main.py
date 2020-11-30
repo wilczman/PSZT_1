@@ -356,10 +356,10 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size=400,
+    population_size=100,
     elite_size_percent=10,
-    mutation_probability=0.8,
-    tournament_size=3,
+    mutation_probability=0.35,
+    tournament_size=2,
     iteration_count_end=100,
     plot_best_values=None,
     plot_best_values_repeated=None,
@@ -368,7 +368,7 @@ def experiment(
     Funkcja wykonująca cały eksperyment algorytmu ewolucyjnego dla zadanych parametrów
     :param points: słownik punktów i ich koordynatów
     :param population_size: ilość osobników w populacji
-    :param elite_size: Ilość najlepszych osobników ze starej populacji przechodzącej do następnej. Domyślna wartość: 30% populacji
+    :param elite_size_percent: Ilość najlepszych osobników ze starej populacji przechodzącej do następnej. Domyślna wartość: 30% populacji
     :param mutation_probability: prawdopodobieństwo wystąpienia mutacji, domyślnie 1/10
     :param iteration_count_end: ilość iteracji bez zmiany najlepiej przystosowanego osobnika do zakończenia algorytmu
     :param tournament_size: Wielkość turnieju (liczba porównywanych ze sobą osobników) podczas selekcji turniejowej. Domyślna wartość: 2
@@ -599,7 +599,7 @@ def investigate_elitarism(start, end, step_arg, points):
     fig.update_layout(
         xaxis_title='Najkrótszy cykl',
         yaxis_title='Rozmiar elity',
-        title='Zależność długości najkrótszego cyklu zwracanego przez algorytm, \nw funkcji rozmiaru elity'
+        title='Zależność długości najkrótszego cyklu od rozmiaru elity'
     )
     fig.write_image(f"elite_size_{start}_{end}_{step_arg}.jpg")
     print(mean_values, std_values)
@@ -664,6 +664,64 @@ def investigate_mutation(start, end, step_arg, points):
     fig.write_image(f"probability_{start}_{end}_{step_arg}.jpg")
     print(mean_values, std_values)
 
+def investigate_iteration_count_end(start, end, step_arg, points):
+    iteration_count_end = list(linspace(start, end, num=int((end - start) / step_arg + 1)))
+    print(iteration_count_end)
+    experiments_per_size = 10
+    mean_values = zeros(shape=[len(iteration_count_end), ])
+    std_values = zeros(shape=[len(iteration_count_end), ])
+    min_values = zeros(shape=[len(iteration_count_end), ])
+    max_values = zeros(shape=[len(iteration_count_end), ])
+
+    generations_mean = zeros(shape=[len(iteration_count_end), ])
+    generations_values = zeros(shape=[len(iteration_count_end), ])
+
+    for idx, _iteration_count_end in enumerate(iteration_count_end):
+        paths_values = zeros(shape=[experiments_per_size, ])
+        generations = zeros(shape=[experiments_per_size, ])
+        print(_iteration_count_end)
+        for expr in range(experiments_per_size):
+            expr_result = experiment(points,
+                                     # population_size=300,
+                                     # elite_size=90,
+                                     iteration_count_end=_iteration_count_end)
+            paths_values[expr] = expr_result[0]
+            generations[expr] = expr_result[3]
+
+        mean_values[idx] = mean(paths_values)
+        std_values[idx] = std(paths_values)
+        min_values[idx] = min(paths_values)
+        max_values[idx] = max(paths_values)
+
+        generations_mean[idx] = mean(generations)
+        generations_values[idx] = std(generations)
+
+    # wyniki w postaci wykresów
+    fig = go.Figure([
+        go.Scatter(
+            x=iteration_count_end,
+            y=mean_values,
+            line=dict(color='rgb(64, 0, 224)'),
+            mode='lines',
+            showlegend=False
+        ),
+        go.Scatter(
+            x=iteration_count_end + iteration_count_end[::-1],
+            y=concatenate([max_values, min_values[::-1]]),  # get_std_bounds(std_values, mean_values),
+            fill='toself',
+            fillcolor='rgba(64, 0, 224, 0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo="skip",
+            showlegend=False
+        )
+    ])
+    fig.update_layout(
+        xaxis_title='Liczba iteracji bez zmian po której kończymy eksperyment',
+        yaxis_title='Najkrótszy cykl',
+        title='Zależność długości cyklu od warunku stopu'
+    )
+    fig.write_image(f"iteration_count_end_{start}_{end}_{step_arg}.jpg")
+    print(mean_values, std_values)
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
@@ -673,7 +731,7 @@ if __name__ == "__main__":
     # for i in range(0, 5):
     #     najlepsze.append(experiment(points,
     #                                 population_size=400,
-    #                                 elite_size=100,
+    #                                 elite_size_percent=100,
     #                                 tournament_size=2,
     #                                 iteration_count_end=100,
     #                                 mutation_probability=0.1,
@@ -687,7 +745,15 @@ if __name__ == "__main__":
     # for c in najlepsze:
     #     print(c)
     
-    investigate_population_size(10, 2011, 50, points)
+    # investigate_population_size(10, 2011, 50, points)
     # investigate_tournament_size(2, 10, 1, points)
-    # investigate_elitarism(1, 100, 10, points)
-    # investigate_mutation(0.1, 1.0, 0.1, points)
+    investigate_elitarism(1, 100, 9, points)
+    # investigate_mutation(0.01, 1.01, 0.05, points)
+    # investigate_iteration_count_end(10,410,50, points)
+    # experiment(points,
+    #             population_size=200,
+    #             elite_size_percent=20,
+    #             tournament_size=3,
+    #             iteration_count_end=400,
+    #             mutation_probability=0.75,
+    #             plot_best_values_repeated=plot)
