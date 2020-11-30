@@ -356,11 +356,11 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size=600,
+    population_size=400,
     elite_size_percent=0.3,
-    mutation_probability=0.6,
-    tournament_size=2,
-    iteration_count_end=50,
+    mutation_probability=0.7,
+    tournament_size=3,
+    iteration_count_end=100,
     plot_best_values=None,
     plot_best_values_repeated=None,
 ):
@@ -458,7 +458,9 @@ def investigate_population_size(start, end, step_arg, points):
         
         mean_values[idx] = mean(paths_values)
         std_values[idx] = std(paths_values)
-
+        min_values[idx] = min(paths_values)
+        max_values[idx] = max(paths_values)
+        
         generations_mean[idx] = mean(generations)
         generations_values[idx] = std(generations)
 
@@ -473,7 +475,7 @@ def investigate_population_size(start, end, step_arg, points):
         ),
         go.Scatter(
             x=population_sizes+population_sizes[::-1],
-            y=concatenate([max_values, min_values[::-1]]),#get_std_bounds(std_values, mean_values),
+            y=concatenate([max_values, min_values[::-1]]),#get_std_bounds(std_values, mean_values),#
             fill='toself',
             fillcolor='rgba(227, 51, 39, 0.2)',
             line=dict(color='rgba(255,255,255,0)'),
@@ -494,6 +496,8 @@ def investigate_tournament_size(start, end, step_arg, points):
     experiments_per_size = 10
     mean_values = zeros(shape=[len(tournament_sizes), ])
     std_values = zeros(shape=[len(tournament_sizes), ])
+    min_values = zeros(shape=[len(tournament_sizes), ])
+    max_values = zeros(shape=[len(tournament_sizes), ])
 
     generations_mean = zeros(shape=[len(tournament_sizes), ])
     generations_values = zeros(shape=[len(tournament_sizes), ])
@@ -548,6 +552,8 @@ def investigate_elitarism(start, end, step_arg, points):
     experiments_per_size = 10
     mean_values = zeros(shape=[len(elite_sizes), ])
     std_values = zeros(shape=[len(elite_sizes), ])
+    min_values = zeros(shape=[len(elite_sizes), ])
+    max_values = zeros(shape=[len(elite_sizes), ])
 
     generations_mean = zeros(shape=[len(elite_sizes), ])
     generations_values = zeros(shape=[len(elite_sizes), ])
@@ -558,7 +564,7 @@ def investigate_elitarism(start, end, step_arg, points):
         print(_elite_size)
         for expr in range(experiments_per_size):
             expr_result = experiment(points,
-                                    population_size=600,
+                                    # population_size=600,
                                     elite_size=_elite_size)
             paths_values[expr] = expr_result[0]
             generations[expr] = expr_result[3]
@@ -617,7 +623,7 @@ def investigate_mutation(start, end, step_arg, points):
         print( _mutation_probability)
         for expr in range(experiments_per_size):
             expr_result = experiment(points,
-                                    population_size=300,
+                                    # population_size=300,
                                     # elite_size=90,
                                     mutation_probability=_mutation_probability)
             paths_values[expr] = expr_result[0]
@@ -681,7 +687,7 @@ if __name__ == "__main__":
     # for c in najlepsze:
     #     print(c)
     
-    investigate_population_size(100, 800, 100, points)
+    investigate_population_size(10, 111, 50, points)
     # investigate_tournament_size(2, 10, 1, points)
     # investigate_elitarism(30, 480, 30, points)
     # investigate_mutation(0.1, 1.0, 0.1, points)
