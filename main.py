@@ -358,9 +358,9 @@ def genetic_operations(specimens, population_size, mutation_probability):
 
 def experiment(
     points,
-    population_size=300,
+    population_size=500,
     elite_size_percent=15,
-    mutation_probability=0.9,
+    mutation_probability=0.8,
     tournament_size=3,
     iteration_count_end=100,
     plot_best_values=None,
@@ -749,31 +749,16 @@ def run_experiment_with_time_markers():
 
 if __name__ == "__main__":
     (points, specimen_length) = load()
-
     plot = go.Figure()
     najlepsze = []
-    # for i in range(0, 5):
-    #     najlepsze.append(experiment(points,
-    #                                 population_size=400,
-    #                                 elite_size_percent=100,
-    #                                 tournament_size=2,
-    #                                 iteration_count_end=100,
-    #                                 mutation_probability=0.1,
-    #                                 plot_best_values_repeated=plot)
-    #                      )
-    # plot.update_layout(title="Zmiana najkrótszego cyklu w populacji na przestrzeni generacji",
-    #                     xaxis_title="Numer generacji", 
-    #                     yaxis_title="Długość najkrótszego cyklu w populacji",)
-    # plot.write_image("test.png")
-    # najlepsze.sort()
-    # for c in najlepsze:
-    #     print(c)
-    
-    # investigate_population_size(10, 2011, 50, points)
-    # investigate_tournament_size(2, 10, 1, points)
-    # investigate_elitarism(1, 100, 9, points)
-    # investigate_mutation(0.01, 1.01, 0.05, points)
-    # investigate_iteration_count_end(10,410,50, points)
+
+    # uruchamiane na wartościach domyślnych, ustawionych w funkcji def experiment
+    # investigate_population_size(start=10, end=2011, step_arg=50, points=points)
+    # investigate_tournament_size(start=2, end=10, step_arg=1, points=points)
+    # investigate_elitarism(start=1, end=100, step_arg=9, points=points)
+    # investigate_mutation(start=0.01, end=1.01, step_arg=0.05, points=points)
+    investigate_iteration_count_end(start=10, end=510, step_arg=50, points=points)
+
     # experiment(points,
     #             population_size=200,
     #             elite_size_percent=20,
@@ -781,4 +766,5 @@ if __name__ == "__main__":
     #             iteration_count_end=400,
     #             mutation_probability=0.75,
     #             plot_best_values_repeated=plot)
-    run_experiment_with_time_markers()
+
+    # run_experiment_with_time_markers()
